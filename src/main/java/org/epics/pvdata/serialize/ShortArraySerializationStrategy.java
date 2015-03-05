@@ -11,6 +11,7 @@ class ShortArraySerializationStrategy implements SerializationStrategy
 		short[] data = (short[])reflectField.get(parentInstance);
 		SerializeHelper.writeSize(data.length, buffer);
 		buffer.asShortBuffer().put(data);
+		buffer.position(buffer.position() + data.length*Short.SIZE);
 	}
 
 	@Override
@@ -19,11 +20,12 @@ class ShortArraySerializationStrategy implements SerializationStrategy
 		boolean reused = true;
 		short[] data = (short[])reflectField.get(parentInstance);
 		int len = SerializeHelper.readSize(buffer);
-		if (len != data.length) {
+		if (data == null || len != data.length) {
 			data = new short[len];
 			reused = false;
 		}
 		buffer.asShortBuffer().get(data, 0, len);
+		buffer.position(buffer.position() + len*Short.SIZE);
 		if (!reused)
 			reflectField.set(parentInstance, data);
 	}

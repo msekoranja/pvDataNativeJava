@@ -11,6 +11,7 @@ class LongArraySerializationStrategy implements SerializationStrategy
 		long[] data = (long[])reflectField.get(parentInstance);
 		SerializeHelper.writeSize(data.length, buffer);
 		buffer.asLongBuffer().put(data);
+		buffer.position(buffer.position() + data.length*Long.SIZE);
 	}
 
 	@Override
@@ -19,11 +20,12 @@ class LongArraySerializationStrategy implements SerializationStrategy
 		boolean reused = true;
 		long[] data = (long[])reflectField.get(parentInstance);
 		int len = SerializeHelper.readSize(buffer);
-		if (len != data.length) {
+		if (data == null || len != data.length) {
 			data = new long[len];
 			reused = false;
 		}
 		buffer.asLongBuffer().get(data, 0, len);
+		buffer.position(buffer.position() + len*Long.SIZE);
 		if (!reused)
 			reflectField.set(parentInstance, data);
 	}

@@ -20,7 +20,7 @@ class BooleanArraySerializationStrategy implements SerializationStrategy
 		boolean reused = true;
 		boolean[] data = (boolean[])reflectField.get(parentInstance);
 		int len = SerializeHelper.readSize(buffer);
-		if (len != data.length) {
+		if (data == null || len != data.length) {
 			data = new boolean[len];
 			reused = false;
 		}

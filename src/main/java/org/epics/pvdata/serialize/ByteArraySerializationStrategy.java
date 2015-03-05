@@ -19,7 +19,7 @@ class ByteArraySerializationStrategy implements SerializationStrategy
 		boolean reused = true;
 		byte[] data = (byte[])reflectField.get(parentInstance);
 		int len = SerializeHelper.readSize(buffer);
-		if (len != data.length) {
+		if (data == null || len != data.length) {
 			data = new byte[len];
 			reused = false;
 		}

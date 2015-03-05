@@ -11,6 +11,7 @@ class DoubleArraySerializationStrategy implements SerializationStrategy
 		double[] data = (double[])reflectField.get(parentInstance);
 		SerializeHelper.writeSize(data.length, buffer);
 		buffer.asDoubleBuffer().put(data);
+		buffer.position(buffer.position() + data.length*Double.SIZE);
 	}
 
 	@Override
@@ -19,11 +20,12 @@ class DoubleArraySerializationStrategy implements SerializationStrategy
 		boolean reused = true;
 		double[] data = (double[])reflectField.get(parentInstance);
 		int len = SerializeHelper.readSize(buffer);
-		if (len != data.length) {
+		if (data == null || len != data.length) {
 			data = new double[len];
 			reused = false;
 		}
 		buffer.asDoubleBuffer().get(data, 0, len);
+		buffer.position(buffer.position() + len*Double.SIZE);
 		if (!reused)
 			reflectField.set(parentInstance, data);
 	}

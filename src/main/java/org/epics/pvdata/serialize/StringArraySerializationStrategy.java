@@ -20,7 +20,7 @@ class StringArraySerializationStrategy implements SerializationStrategy
 		boolean reused = true;
 		String[] data = (String[])reflectField.get(parentInstance);
 		int len = SerializeHelper.readSize(buffer);
-		if (len != data.length) {
+		if (data == null || len != data.length) {
 			data = new String[len];
 			reused = false;
 		}

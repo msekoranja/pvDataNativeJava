@@ -20,7 +20,7 @@ class CharArraySerializationStrategy implements SerializationStrategy
 		boolean reused = true;
 		char[] data = (char[])reflectField.get(parentInstance);
 		int len = SerializeHelper.readSize(buffer);
-		if (len != data.length) {
+		if (data == null || len != data.length) {
 			data = new char[len];
 			reused = false;
 		}
