@@ -50,7 +50,8 @@ public final class SerializationStrategies
 		map.put(String[].class, STRING_ARRAY);
 
 		map.put(char.class, CHAR);
-		map.put(char.class, CHAR_ARRAY);
+		map.put(char[].class, CHAR_ARRAY);
+		
 		strategiesMap = Collections.unmodifiableMap(map);
 	}
 	
