@@ -10,7 +10,7 @@ import org.epics.pvdata.serialize.SerializationStrategy;
 import org.epics.pvdata.serialize.SerializeHelper;
 
 public class PVData {
-
+	
 	public static void serialize(ByteBuffer buffer, Object data) 
 	{
 		serialize(buffer, data, data.getClass());
@@ -33,61 +33,72 @@ public class PVData {
 				try
 				{
 					Class<?> type = field.getType();
-					SerializationStrategy ss = SerializationStrategies.strategiesMap.get(type);
-					if (ss != null)
-					{
-						ss.serialize(buffer, field, data);
-					}
-					else
-					{
-						if (type.isPrimitive())
-							throw new RuntimeException("unsupported primitive type: " + type);
-						else if (type.isArray())
-						{
-							Object array = field.get(data);
-							if (array == null)
-								throw new NullPointerException(field.toString());
-							
-							int len = Array.getLength(array);
-							Class<?> elementType = type.getComponentType();
-							
-							// primitive arrays should be serialized via predefined strategy
-							if (elementType.isPrimitive())
-								throw new RuntimeException("unsupported primitive array type: " + type);
-							// nd-arrays not supported by pvData
-							else if (elementType.isArray())
-								throw new RuntimeException("nd-arrays not supported: " + type);
-								
-							//ss = SerializationStrategies.strategiesMap.get(elementType);
-								
-							SerializeHelper.writeSize(len, buffer);
-							for (int i = 0; i < len; i++)
-							{
-								Object elementData = Array.get(array, i);
-								boolean notNull = (elementData != null);
-								buffer.put(notNull ? (byte)1 : (byte)0);
-								if (notNull)
-								{
-									//if (ss != null)
-									//	ss.serialize(buffer, elementData);
-									serialize(buffer, elementData, elementType);
-								}
-							}
-						}
-						else if (type.isEnum())
-						{
-							// TODO extract int value()
-							throw new RuntimeException("enums not supported:" + field);
-						}
-						else
-						{
-							Object fieldData = field.get(data);
-							serialize(buffer, fieldData, type);
-						}
-					}
+					serializeField(buffer, data, field, type);
 				} catch (Throwable e) {
 					throw new RuntimeException("failed to serialize: " + field, e);
 				}
+			}
+		}
+	}
+
+	private static void serializeField(ByteBuffer buffer, Object data,
+			Field field, Class<?> fieldClass) throws IllegalAccessException {
+		SerializationStrategy ss = SerializationStrategies.strategiesMap.get(fieldClass);
+		if (ss != null)
+		{
+			ss.serialize(buffer, field, data);
+		}
+		else
+		{
+			if (fieldClass.isPrimitive())
+				throw new RuntimeException("unsupported primitive type: " + fieldClass);
+			else if (fieldClass.isArray())
+			{
+				Object array = field.get(data);
+				if (array == null)
+					throw new NullPointerException(field.toString());
+				
+				int len = Array.getLength(array);
+				Class<?> elementType = fieldClass.getComponentType();
+				
+				// primitive arrays should be serialized via predefined strategy
+				if (elementType.isPrimitive())
+					throw new RuntimeException("unsupported primitive array type: " + fieldClass);
+				// nd-arrays not supported by pvData
+				else if (elementType.isArray())
+					throw new RuntimeException("nd-arrays not supported: " + fieldClass);
+					
+				//ss = SerializationStrategies.strategiesMap.get(elementType);
+					
+				SerializeHelper.writeSize(len, buffer);
+				for (int i = 0; i < len; i++)
+				{
+					Object elementData = Array.get(array, i);
+					boolean notNull = (elementData != null);
+					buffer.put(notNull ? (byte)1 : (byte)0);
+					if (notNull)
+					{
+						//if (ss != null)
+						//	ss.serialize(buffer, elementData);
+						serialize(buffer, elementData, elementType);
+					}
+				}
+			}
+			else if (fieldClass.isEnum())
+			{
+				// TODO extract int value()
+				throw new RuntimeException("enums not supported:" + field);
+			}
+			else
+			{
+				Object fieldData = field.get(data);
+				Class<?> fieldDataClass = fieldData.getClass();
+				
+				// tricky way to detect type erasure, i.e. generics
+				if (fieldClass == Object.class && fieldDataClass != Object.class)
+					serializeField(buffer, data, field, fieldDataClass);
+				else
+					serialize(buffer, fieldData, fieldClass);
 			}
 		}
 	}
