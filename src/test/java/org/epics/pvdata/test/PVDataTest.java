@@ -3,9 +3,9 @@ package org.epics.pvdata.test;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import org.epics.pvdata.PVData;
-
 import junit.framework.TestCase;
+
+import org.epics.pvdata.PVData;
 
 public class PVDataTest extends TestCase {
 
@@ -263,4 +263,126 @@ public class PVDataTest extends TestCase {
 		assertEquals(n1, data);
 		
 	}
+	
+	
+	public static class TimeStamp {
+		
+		long seconds;
+		int nanos;
+
+		// needed for deserialization
+		public TimeStamp() {
+		}
+
+		public TimeStamp(long seconds, int nanos) {
+			this.seconds = seconds;
+			this.nanos = nanos;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TimeStamp other = (TimeStamp) obj;
+			if (nanos != other.nanos)
+				return false;
+			if (seconds != other.seconds)
+				return false;
+			return true;
+		}
+	}
+	
+	public static class TimeStampArray {
+		TimeStamp[] f1;
+		int check;
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TimeStampArray other = (TimeStampArray) obj;
+			if (check != other.check)
+				return false;
+			if (!Arrays.equals(f1, other.f1))
+				return false;
+			return true;
+		}
+		
+	}
+
+	public void testClassArrays()
+	{
+		TimeStampArray data = new TimeStampArray();
+		data.f1 = new TimeStamp[] {
+			new TimeStamp(1234567890L, 4324932),
+			new TimeStamp(4832942324L, 4353294),
+			new TimeStamp(0434304304L, 7643224),
+			new TimeStamp(5454549224L, 9867324),
+		};
+		data.check = 0x12345678;
+		
+		ByteBuffer buffer = ByteBuffer.allocate(1024);
+		PVData.serialize(buffer, data);
+		
+		buffer.flip();
+
+		TimeStampArray data2 = PVData.deserialize(buffer, TimeStampArray.class);
+		assertEquals(data, data2);
+	}
+	
+	public static class Generics<T> {
+		T f1;
+		int check;
+
+		@SuppressWarnings("rawtypes")
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Generics other = (Generics) obj;
+			if (check != other.check)
+				return false;
+			if (f1 == null) {
+				if (other.f1 != null)
+					return false;
+			} else if (!f1.equals(other.f1))
+				return false;
+			return true;
+		}
+	}
+
+	public void testGenerics()
+	{
+		Generics<TimeStamp> data = new Generics<TimeStamp>();
+		data.f1 = new TimeStamp(1234567890L, 4324932);
+		data.check = 0x12345678;
+		
+		ByteBuffer buffer = ByteBuffer.allocate(1024);
+		PVData.serialize(buffer, data);
+		
+		buffer.flip();
+		
+	
+		Generics<TimeStamp> data2 = new Generics<TimeStamp>();
+		// this is NECESSARY: initialize generic type 
+		data2.f1 = new TimeStamp(0, 0);
+		PVData.deserialize(buffer, data2);
+		assertEquals(data, data2);
+		
+		// this does not work due to type erassure
+		//PVData.deserialize(buffer, Generics.class);
+	}
+	
 }

@@ -156,11 +156,6 @@ public class PVData {
 							throw new RuntimeException("unsupported primitive type: " + type);
 						else if (type.isArray())
 						{
-							Object array = field.get(data);
-							if (array == null)
-								throw new NullPointerException(field.toString());
-							
-							int len = Array.getLength(array);
 							Class<?> elementType = type.getComponentType();
 							
 							// primitive arrays should be serialized via predefined strategy
@@ -172,17 +167,34 @@ public class PVData {
 								
 							//ss = SerializationStrategies.strategiesMap.get(elementType);
 								
-							SerializeHelper.writeSize(len, buffer);
+							int len = SerializeHelper.readSize(buffer);
+
+							Object array = field.get(data);
+							if (array == null)
+							{
+								array = Array.newInstance(elementType, len);
+								field.set(data, array);
+							}
+							
 							for (int i = 0; i < len; i++)
 							{
-								Object elementData = Array.get(array, i);
-								boolean notNull = (elementData != null);
-								buffer.put(notNull ? (byte)1 : (byte)0);
-								if (notNull)
+								boolean isNull = (buffer.get() == 0);
+								if (isNull)
 								{
+									Array.set(array, i, null);
+								}
+								else
+								{
+									Object elementData = Array.get(array, i);
+									if (elementData == null)
+									{
+										elementData = elementType.newInstance();
+										Array.set(array, i, elementData);
+									}
+
 									//if (ss != null)
-									//	ss.serialize(buffer, elementData);
-									serialize(buffer, elementData, elementType);
+									//	ss.deserialize(buffer, elementData);
+									deserialize(buffer, elementData, elementType);
 								}
 							}
 						}
@@ -199,6 +211,12 @@ public class PVData {
 								fieldData = type.newInstance();
 								field.set(data, fieldData);
 							}
+							// tricky way to detect type erasure, i.e. generics
+							else if (type == Object.class && fieldData.getClass() != Object.class)
+							{
+								type = fieldData.getClass();
+							}
+							
 							deserialize(buffer, fieldData, type);
 						}
 					}
