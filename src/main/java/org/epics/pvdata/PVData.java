@@ -4,6 +4,8 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.epics.pvdata.serialize.SerializationStrategies;
 import org.epics.pvdata.serialize.SerializationStrategy;
@@ -16,9 +18,25 @@ public class PVData {
 		serialize(buffer, data, data.getClass());
 	}
 	
+	private static Map<Class<?>, Field[]> cachedFields = new HashMap<Class<?>, Field[]>();
+	
+	private static Field[] getFields(Class<?> clazz)
+	{
+		// TODO sync?
+		// cached access to fields
+		Field[] fields = cachedFields.get(clazz);
+		if (fields == null)
+		{
+			// TODO only declared ?!!!
+			fields = clazz.getDeclaredFields();
+			cachedFields.put(clazz, fields);
+		}
+		return fields;
+	}
+	
 	public static void serialize(ByteBuffer buffer, Object data, Class<?> clazz) 
 	{
-		for (Field field : clazz.getDeclaredFields())
+		for (Field field : getFields(clazz))
 		{
 			// make field accessible even if it's private, protected
 			if (!field.isAccessible())
@@ -42,7 +60,8 @@ public class PVData {
 	}
 
 	private static void serializeField(ByteBuffer buffer, Object data,
-			Field field, Class<?> fieldClass) throws IllegalAccessException {
+			Field field, Class<?> fieldClass) throws IllegalAccessException
+	{
 		SerializationStrategy ss = SerializationStrategies.strategiesMap.get(fieldClass);
 		if (ss != null)
 		{
@@ -130,7 +149,7 @@ public class PVData {
 	
 	public static <T> T deserialize(ByteBuffer buffer, T data, Class<?> clazz) 
 	{
-		for (Field field : clazz.getDeclaredFields())
+		for (Field field : getFields(clazz))
 		{
 			// make field accessible even if it's private, protected
 			if (!field.isAccessible())
