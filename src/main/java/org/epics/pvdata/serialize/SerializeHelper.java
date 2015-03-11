@@ -56,4 +56,42 @@ public final class SerializeHelper {
 		else
 			return null;
 	}
+	
+	/**
+	 * Scalar types.
+	 */
+	
+	public enum ScalarType {
+	    pvBoolean,
+	    pvByte,
+	    pvShort,
+	    pvInt,
+	    pvLong,
+	    pvUByte,
+	    pvUShort,
+	    pvUInt,
+	    pvULong,
+	    pvFloat,
+	    pvDouble,
+	    pvString;
+	}
+	
+	/**
+	 * Type code for each scalarType.
+	 */
+	public static final byte[] scalarTypeCodeLUT = {
+		0x00, // pvBoolean
+		0x20, // pvByte
+		0x21, // pvShort
+		0x22, // pvInt
+		0x23, // pvLong
+		0x24, // pvUByte
+		0x25, // pvUShort
+		0x26, // pvUInt
+		0x27, // pvULong
+		0x42, // pvFloat
+		0x43, // pvDouble
+		0x60  // pvString
+	};
+	
 }

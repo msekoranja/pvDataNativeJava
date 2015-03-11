@@ -5,25 +5,25 @@ import java.nio.ByteBuffer;
 
 import org.epics.pvdata.serialize.SerializeHelper.ScalarType;
 
-class CharSerializationStrategy implements SerializationStrategy
+class BooleanBoxedSerializationStrategy implements SerializationStrategy
 {
 	@Override
 	public void serialize(ByteBuffer buffer, Field reflectField,
 			Object parentInstance) throws IllegalAccessException {
-		char c = reflectField.getChar(parentInstance);
-		buffer.putShort((short)c);
+		boolean value = (Boolean)reflectField.get(parentInstance);
+		buffer.put(value ? (byte)1 : (byte)0);
 	}
 
 	@Override
 	public void deserialize(ByteBuffer buffer, Field reflectField,
 			Object parentInstance) throws IllegalAccessException {
-		char c = (char)buffer.getShort();
-		reflectField.setChar(parentInstance, c);
+		Boolean value = buffer.get() == 0 ? Boolean.FALSE : Boolean.TRUE;
+		reflectField.set(parentInstance, value);
 	}
 
 	@Override
 	public void serializeIF(ByteBuffer buffer, Field reflectField,
 			Object parentInstance) throws IllegalAccessException {
-		buffer.put(SerializeHelper.scalarTypeCodeLUT[ScalarType.pvShort.ordinal()]);
+		buffer.put(SerializeHelper.scalarTypeCodeLUT[ScalarType.pvBoolean.ordinal()]);
 	}
 }

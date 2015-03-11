@@ -8,4 +8,5 @@ public interface SerializationStrategy
 {
 	void serialize(ByteBuffer buffer, Field reflectField, Object parentInstance) throws IllegalAccessException;
 	void deserialize(ByteBuffer buffer, Field reflectField, Object parentInstance) throws IllegalAccessException;
+	void serializeIF(ByteBuffer buffer, Field reflectField, Object parentInstance) throws IllegalAccessException;
 }

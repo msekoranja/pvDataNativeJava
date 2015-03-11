@@ -3,6 +3,8 @@ package org.epics.pvdata.serialize;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 
+import org.epics.pvdata.serialize.SerializeHelper.ScalarType;
+
 class ByteSerializationStrategy implements SerializationStrategy
 {
 	@Override
@@ -15,5 +17,11 @@ class ByteSerializationStrategy implements SerializationStrategy
 	public void deserialize(ByteBuffer buffer, Field reflectField,
 			Object parentInstance) throws IllegalAccessException {
 		reflectField.setByte(parentInstance, buffer.get());
+	}
+
+	@Override
+	public void serializeIF(ByteBuffer buffer, Field reflectField,
+			Object parentInstance) throws IllegalAccessException {
+		buffer.put(SerializeHelper.scalarTypeCodeLUT[ScalarType.pvByte.ordinal()]);
 	}
 }

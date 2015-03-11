@@ -12,6 +12,105 @@ import org.epics.pvdata.serialize.SerializationStrategy;
 import org.epics.pvdata.serialize.SerializeHelper;
 
 public class PVData {
+	/*
+	public static void serializeIF(ByteBuffer buffer, Object data, Class<?> clazz) 
+	{
+		// TODO cache introspection interfaces 
+		
+		for (Field field : getFields(clazz))
+		{
+			// make field accessible even if it's private, protected
+			if (!field.isAccessible())
+				field.setAccessible(true);
+
+			int modifiers = field.getModifiers();
+			// note: we do no ignore static
+			// we ignore final for non-static classes (they carry this$0 field)
+			boolean ignore = Modifier.isFinal(modifiers) || Modifier.isTransient(modifiers);
+			if (!ignore)
+			{
+				try
+				{
+					Class<?> type = field.getType();
+					serializeFieldIF(buffer, data, field, type);
+				} catch (Throwable e) {
+					throw new RuntimeException("failed to serializeIF: " + field, e);
+				}
+			}
+		}
+	}
+
+	private static void serializeFieldIF(ByteBuffer buffer, Object data,
+			Field field, Class<?> fieldClass) throws IllegalAccessException
+	{
+		SerializationStrategy ss = SerializationStrategies.strategiesMap.get(fieldClass);
+		if (ss != null)
+		{
+			ss.serializeIF(buffer, field, data);
+		}
+		else
+		{
+			if (fieldClass.isPrimitive())
+				throw new RuntimeException("unsupported primitive type: " + fieldClass);
+			else if (fieldClass.isArray())
+			{
+				Object array = field.get(data);
+				if (array == null)
+					throw new NullPointerException(field.toString());
+				
+				Class<?> elementType = fieldClass.getComponentType();
+				
+				// primitive arrays should be serialized via predefined strategy
+				if (elementType.isPrimitive())
+					throw new RuntimeException("unsupported primitive array type: " + fieldClass);
+				// nd-arrays not supported by pvData
+				else if (elementType.isArray())
+					throw new RuntimeException("nd-arrays not supported: " + fieldClass);
+					
+				//ss = SerializationStrategies.strategiesMap.get(elementType);
+					
+				// TODO fixed, bounded arrays
+				
+				// TODO serialize complex arrays
+			}
+			else if (fieldClass.isEnum())
+			{
+				// TODO extract int value()
+				throw new RuntimeException("enums not supported:" + field);
+			}
+			else
+			{
+				Object fieldData = field.get(data);
+				Class<?> fieldDataClass = fieldData.getClass();
+				
+				// tricky way to detect type erasure, i.e. generics
+				if (fieldClass == Object.class && fieldDataClass != Object.class)
+					serializeFieldIF(buffer, data, field, fieldDataClass);
+				else
+				{
+					// sub-structure
+	
+					buffer.put((byte)0x80);
+
+					//private static final String EMPTY_ID = "";
+					//final String idToSerialize = (id == DEFAULT_ID) ? EMPTY_ID : id;
+					SerializeHelper.serializeString(fieldClass.getName(), buffer);
+					
+					SerializeHelper.writeSize(fields.length, buffer);
+					for (int i = 0; i < fields.length; i++)
+					{
+						SerializeHelper.serializeString(fieldNames[i], buffer);
+						control.cachedSerialize(fields[i], buffer);
+					}
+					
+					serializeIF(buffer, fieldData, fieldClass);
+					
+					
+				}
+			}
+		}
+	}
+	*/
 	
 	public static void serialize(ByteBuffer buffer, Object data) 
 	{
@@ -27,7 +126,7 @@ public class PVData {
 		Field[] fields = cachedFields.get(clazz);
 		if (fields == null)
 		{
-			// TODO only declared ?!!!
+			// TODO only declared, what about inherited ?!!!
 			fields = clazz.getDeclaredFields();
 			cachedFields.put(clazz, fields);
 		}

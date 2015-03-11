@@ -84,6 +84,104 @@ public class PVDataTest extends TestCase {
 	}
 	
 	
+	public static class AllPrimitivesBoxed {
+		Boolean f1;
+		Byte f2;
+		Short f3;
+		Integer f4;
+		Long f5;
+		Float f6;
+		Double f7;
+		String f8;
+		
+		Character f9;
+		int check;
+		
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			AllPrimitivesBoxed other = (AllPrimitivesBoxed) obj;
+			if (check != other.check)
+				return false;
+			if (f1 == null) {
+				if (other.f1 != null)
+					return false;
+			} else if (!f1.equals(other.f1))
+				return false;
+			if (f2 == null) {
+				if (other.f2 != null)
+					return false;
+			} else if (!f2.equals(other.f2))
+				return false;
+			if (f3 == null) {
+				if (other.f3 != null)
+					return false;
+			} else if (!f3.equals(other.f3))
+				return false;
+			if (f4 == null) {
+				if (other.f4 != null)
+					return false;
+			} else if (!f4.equals(other.f4))
+				return false;
+			if (f5 == null) {
+				if (other.f5 != null)
+					return false;
+			} else if (!f5.equals(other.f5))
+				return false;
+			if (f6 == null) {
+				if (other.f6 != null)
+					return false;
+			} else if (!f6.equals(other.f6))
+				return false;
+			if (f7 == null) {
+				if (other.f7 != null)
+					return false;
+			} else if (!f7.equals(other.f7))
+				return false;
+			if (f8 == null) {
+				if (other.f8 != null)
+					return false;
+			} else if (!f8.equals(other.f8))
+				return false;
+			if (f9 == null) {
+				if (other.f9 != null)
+					return false;
+			} else if (!f9.equals(other.f9))
+				return false;
+			return true;
+		}
+		
+	}
+	
+	public void testPrimitivesBoxed()
+	{
+		AllPrimitivesBoxed data = new AllPrimitivesBoxed();
+		data.f1 = true;
+		data.f2 = 10;
+		data.f3 = 1000;
+		data.f4 = 1000000000;
+		data.f5 = 1000000000000000000L;
+		data.f6 = 12.34f;
+		data.f7 = 567.89;
+		data.f8 = "hello";
+		data.f9 = 'A';
+		data.check = 0x12345678;
+		
+		ByteBuffer buffer = ByteBuffer.allocate(1024);
+		PVData.serialize(buffer, data);
+		
+		buffer.flip();
+		
+		AllPrimitivesBoxed data2 = PVData.deserialize(buffer, AllPrimitivesBoxed.class);
+		
+		assertEquals(data, data2);
+	}
+
 	public static class AllPrimitiveArrays {
 		boolean[] f1;
 		byte[] f2;

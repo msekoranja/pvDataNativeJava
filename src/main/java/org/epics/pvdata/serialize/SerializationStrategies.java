@@ -27,6 +27,16 @@ public final class SerializationStrategies
 	public static SerializationStrategy CHAR = new CharSerializationStrategy();
 	public static SerializationStrategy CHAR_ARRAY = new CharArraySerializationStrategy();
 
+	public static SerializationStrategy BOOLEAN_BOXED = new BooleanBoxedSerializationStrategy();
+	public static SerializationStrategy BYTE_BOXED = new ByteBoxedSerializationStrategy();
+	public static SerializationStrategy SHORT_BOXED = new ShortBoxedSerializationStrategy();
+	public static SerializationStrategy INT_BOXED = new IntBoxedSerializationStrategy();
+	public static SerializationStrategy LONG_BOXED = new LongBoxedSerializationStrategy();
+	public static SerializationStrategy FLOAT_BOXED = new FloatBoxedSerializationStrategy();
+	public static SerializationStrategy DOUBLE_BOXED = new DoubleBoxedSerializationStrategy();
+
+	public static SerializationStrategy CHAR_BOXED = new CharBoxedSerializationStrategy();
+
 	public static final Map<Class<?>, SerializationStrategy> strategiesMap;
 	
 	static {
@@ -51,6 +61,17 @@ public final class SerializationStrategies
 
 		map.put(char.class, CHAR);
 		map.put(char[].class, CHAR_ARRAY);
+	
+		// boxed
+		map.put(Boolean.class, BOOLEAN_BOXED);
+		map.put(Byte.class, BYTE_BOXED);
+		map.put(Short.class, SHORT_BOXED);
+		map.put(Integer.class, INT_BOXED);
+		map.put(Long.class, LONG_BOXED);
+		map.put(Float.class, FLOAT_BOXED);
+		map.put(Double.class, DOUBLE_BOXED);
+
+		map.put(Character.class, CHAR_BOXED);
 		
 		strategiesMap = Collections.unmodifiableMap(map);
 	}

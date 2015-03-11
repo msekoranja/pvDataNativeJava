@@ -5,20 +5,20 @@ import java.nio.ByteBuffer;
 
 import org.epics.pvdata.serialize.SerializeHelper.ScalarType;
 
-class CharSerializationStrategy implements SerializationStrategy
+class CharBoxedSerializationStrategy implements SerializationStrategy
 {
 	@Override
 	public void serialize(ByteBuffer buffer, Field reflectField,
 			Object parentInstance) throws IllegalAccessException {
-		char c = reflectField.getChar(parentInstance);
-		buffer.putShort((short)c);
+		Character c = (Character)reflectField.get(parentInstance);
+		buffer.putShort((short)(c.charValue()));
 	}
 
 	@Override
 	public void deserialize(ByteBuffer buffer, Field reflectField,
 			Object parentInstance) throws IllegalAccessException {
 		char c = (char)buffer.getShort();
-		reflectField.setChar(parentInstance, c);
+		reflectField.set(parentInstance, c);
 	}
 
 	@Override
